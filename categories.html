@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Categories page</title>
+        
+        <style>
+            body{
+                margin: 0;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                background-color: rgb(197, 246, 249);
+            }
+            .container1{
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                width: 15%;
+                padding: 15px;
+            }
+            
+            .new-cat{
+                margin: 150px 0 0 50px;
+                display: none;
+                padding: 5px;
+                position: fixed;
+                z-index: 1;
+                background-color: rgb(4, 49, 51);
+                width: max-content;
+                height: max-content;
+                border: thin;
+                border-radius: 5px;
+                overflow: auto;
+                text-align: center;
+            }
+
+            .new-cat-form input{
+                margin: 8px 8px 8px 8px;
+            }
+
+            .new-cat-form button{
+                margin: 8px 8px 8px 8px;
+            }
+
+            .closeBtn{
+                color: rgb(224, 241, 242);
+                float: right;
+                font-size: large;
+                font-weight: bold;
+            }
+
+            .closeBtn:hover{
+                cursor:default;
+            }
+
+            .container2{
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+            }
+
+
+            .category-sec{
+                margin: 25px 25px 25px 25px;
+                padding: 8px;
+                display: flex;
+                justify-content:center;
+                align-items: center;
+                width: max-content;
+                height: max-content;
+                border: thin;
+                border-radius: 5px;
+                text-align: center;
+                background-color: rgb(4, 49, 51);
+                
+            }
+
+            .catName{  
+                text-decoration: none;
+                color: rgb(224, 241, 242);
+                margin-bottom: 5px;
+                border: thin;
+                width: max-content;
+                height: max-content;
+                margin-bottom: 5px;
+            }
+
+            .removeCatBtn{
+                text-decoration: none;
+                padding: 5px 5px 5px 5px;
+                width: max-content;
+                height: fit-content;
+                background-color: red;
+                color: white;
+                border: thin;
+                border-radius: 5px;
+            }
+
+            
+        </style>
+
+        <script>
+            // New cat 
+
+            function showDiv(div){
+                document.querySelector(`.${div}`).style.display= "block";
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                document.querySelector('.new-cat-btn').onclick= function(){
+                    let div= this.dataset.div;
+                    showDiv(div);
+                }
+
+                document.querySelector('.closeBtn').onclick= function(){
+                    document.querySelector('.new-cat').style.display= "none";
+                }
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container1">
+            <button style=" width: 120px; height: 25px;" data-div="new-cat" class="new-cat-btn">new category</button>
+            <form method="post" action="{% url 'core:categories' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="search_category">
+                <input type="text" name="category" placeholder="search ...">
+                <button type="submit">search</button>
+            </form>
+
+        </div>
+        <div class="new-cat">
+            <span class="closeBtn">&times;</span>
+            <form class="new-cat-form" method="post" action="{% url 'core:categories' %}">
+                {% csrf_token %}
+                <input type="hidden" name="from_type" value="new_category">
+                <input type="text" name="category" placeholder="Category name">
+                <button type="submit">save</button>
+            </form>
+
+            <script>
+                // New category form
+
+                document.querySelector('.new-cat-form').onsubmit= function(event){
+                    event.preventDefault();
+
+                    const formdata= new FormData(this);
+                    const url= this.action;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    console.log("dataForm:", ...formdata.entries());
+
+                    fetch(url, {
+                        method: "POST",
+                        body: formdata,
+                        headers:{
+                            'X-CSRFToken': csrfToken,
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok) {
+                            throw new Error("Network reponse is not okay");
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("data:", data);
+                        if (data.message) {
+                            alert(data.message);
+                            window.location.href= "{% url 'core:categories' %}";
+                        }
+
+                        if (data.error) {
+                            alert(data.error);
+                            window.location.href= "{% url 'core:categories' %}";
+                        }
+                    })
+
+                    .catch(error =>{
+                        console.log("error:", error);
+                    });
+                }
+            </script>
+        </div>
+        <div class="container2">
+            {% for cat in cats %}
+                <div class="category-sec">
+                    <a class="catName" href="{% url 'core:category' category_id=cat.id %}">{{ cat }}</a><br>
+                    <a class="removeCatBtn" href="{% url 'core:remove_category' category_id=cat.id %}">Delete</a>
+    
+                    <script>
+                        // Remove category
+                        document.querySelectorAll('.removeBtn').forEach(btn =>{
+                            btn.onclick= function(event){
+                                event.preventDefault();
+                                
+                                const url= this.href;
+                                const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                                fetch(url, {
+                                    method: "DELETE",
+                                    headers:{
+                                        "X-CSRFToken": csrfToken,
+                                        "Content-Type": "application/json",
+                                    }
+                                })
+
+                                .then(response =>{
+                                    if (!response.ok) {
+                                        throw new Error("Network response is not okay");
+                                    }
+
+                                    return response.json();
+                                })
+
+                                .then(data =>{
+                                    console.log("data:", data);
+                                    alert(data.message);
+                                    window.location.href= "{% url 'core:categories' %}";
+                                })
+
+                                .catch(error =>{
+                                    console.log("error:", error);
+                                });
+                            }
+                        }); 
+                        
+                    </script>
+                </div>
+            {% endfor %}
+        </div>
+    </body>
+</html>

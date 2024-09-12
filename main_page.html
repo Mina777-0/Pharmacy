@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Main Page</title>
+        
+    </head>
+    <body>
+        <div>
+            <h1></h1>
+            <a href="{% url 'user/api:cart_page' %}">Cart</a>
+
+            <div class="pharms-sec">
+
+            </div>
+        </div>
+        <script>
+            console.log("Token:", sessionStorage.getItem('token'));
+
+            const email= localStorage.getItem('email');
+            console.log("Retreived email:", email);
+            if (email) {
+                document.querySelector('h1').innerHTML= "Hello" +" " + email;
+            } else {
+                document.querySelector('h1').innerHTML= "Hello" +" " + "Guest";
+            }
+
+            const url= "{% url 'user/api:main' %}";
+
+            fetch(url, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+
+            .then(response =>{
+                if (!response.ok) {
+                    throw new Error("Network response isn't okay");
+                }
+                return response.json();
+            })
+
+            .then(data =>{
+                console.log("data:", data);
+                let pharmSec= document.querySelector('.pharms-sec');
+                pharmSec.innerHTML = '';
+
+                data.forEach(pharmacy =>{
+                    let pharmElement= document.createElement('div');
+                    let pharmacy_stock_url= `{% url 'user/api:pharmacy_stock' 0 %}`.replace("0", pharmacy.id);
+                    pharmElement.innerHTML= `
+                        <h3><a href= "${pharmacy_stock_url}" class= "pharm-link" data-id= ${pharmacy.id} data-name= ${pharmacy.name}>${pharmacy.name}</a></h3>
+                        <p>${pharmacy.address}</p>
+                        <p>${pharmacy.phone_number}</p>
+                        <p>${pharmacy.email}</p>
+                    `;
+                    pharmSec.appendChild(pharmElement);
+                });
+
+                document.querySelectorAll('.pharm-link').forEach(link =>{
+                    link.onclick= function(event){
+                        event.preventDefault();
+
+                        let pharmacyName= this.getAttribute("data-name");
+                        let pharmacyID= this.getAttribute('data-id');
+
+                        localStorage.setItem('pharmacyID', pharmacyID);
+                        localStorage.setItem('pharmacyName', pharmacyName);
+
+                        window.location.href= "{% url 'user/api:pharmacy_page' %}";
+                    }
+                });
+
+               
+            })
+
+            .catch(error =>{
+                console.log("error:", error);
+            });
+            
+
+            navigator.geolocation.getCurrentPosition(function(position){
+                let x= position.coords.latitude;
+                let y= position.coords.longitude;
+            });
+        </script>
+    </body>
+</html>

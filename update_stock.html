@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stock page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(178, 246, 250);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .update-stock{
+                margin: 15px;
+                padding: 15px;
+                background-color: rgb(4, 49, 51);
+                color: aqua;
+                width: 450px;
+                border: thin;
+                border-radius: 7px;
+                text-align: center;
+            }
+
+            .update-stock button{
+                background-color: beige;
+                color: rgb(4, 49, 51);
+                padding: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                border-radius: 7px;
+            }
+
+
+        </style>
+    </head>
+    <body>
+        <div class="update-stock">
+            <form method="post" action="{% url 'core:update_pharmacy_stock' pharmacy_id=pharmacy_id medicine_id=medicine_id %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button>save</button>
+            </form>
+
+        </div>
+    </body>
+</html>

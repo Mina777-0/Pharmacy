@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Admin Page</title>
+
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(192, 220, 244);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+                color: rgb(7, 41, 2);
+            }
+            
+            .section {
+                margin-top: 10%;
+                margin-left: 40%;
+                padding: 8px;
+                background-color: rgb(7, 41, 2);
+                color: rgb(192, 220, 244);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+                width: fit-content;
+                height: max-content;
+                text-align: center;
+                border: thin;
+                border-radius: 5px;
+            }
+
+            .section input{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(7, 41, 2);
+                width: 75%px;
+                height: 20px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+            }
+
+            .section button{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(7, 41, 2);
+                width: 25%px;
+                height: 30px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+                cursor: pointer;
+            }
+            
+        </style>
+        
+        
+    </head>
+    <body>
+        <div>
+            <div id="signup" class="section">
+                <form method="post" action="{% url 'core:signup' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">Submit</button>
+                </form>
+            </div>
+        </div>
+    </body>
+</html>

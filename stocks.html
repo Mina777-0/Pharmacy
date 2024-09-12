@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> {{ pharmacy_id.name }} stock page</title>
+
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(178, 246, 250);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+            .container{
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+            }
+
+            .stock table {
+                border: 1px solid black;
+                text-align: center;
+            }
+
+            .stock th{
+                padding: 10px;
+                border: 1px solid black;
+            }
+
+            .stock td{
+                padding: 5px;
+                border: 1px solid black;
+            }
+
+            .stock td a{
+                text-decoration: none;
+                color: rgb(255, 132, 0);
+            }
+
+            .stock td a:hover{
+                text-decoration: underline;
+                color: rgb(66, 35, 2);
+            }
+
+            .stock td input{
+                width: 15px;
+                text-align: center;
+            }
+
+            .new-stock-item{
+                padding: 10px;
+                background-color: rgb(49, 59, 66);
+                color: white;
+                text-align: center;
+                border: thin;
+                border-radius: 7px;
+            }
+
+            .new-stock-item button{
+                background-color:beige;
+                color: rgb(4, 49, 51);
+                padding: 5px;
+                border-radius: 5px;
+                margin: 10px;
+            }
+
+
+            .filter{
+                margin-top: 35px;
+                width: 250px;
+            }
+
+            .filter button{
+                background-color: rgb(4, 49, 51);
+                color: beige;
+                padding: 5px;
+                border-radius: 5px;
+                margin: 10px;
+            }
+            
+        </style>
+
+        
+    </head>
+    <body>
+        <div class="container">
+            <div class="filter">
+                <h4>Filter Medicines</h4>
+                <form method="post" action="{% url 'core:pharmacy_stock' pharmacy_id=pharmacy_id  %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="filter_stock">
+                    <input type="checkbox" name="category" value="">
+                    <label>All categories</label><br>
+
+                    {% for category in categories %}
+                        <input type="checkbox" name="category" value="{{ category.name }}">
+                        <label>{{ category.name }}</label><br>
+                    {% endfor %}
+
+                    <button type="submit">apply</button>
+                </form>
+            </div>
+
+            <div class="stock">
+                <table>
+                    <th>Medicine</th>
+                    <th>Category</th>
+                    <th>Quantity</th>
+                    <th>Cart</th>
+
+                    {% for stock in stock %}
+                        <tr>
+                            <td><a href="{% url 'core:update_pharmacy_stock' pharmacy_id=stock.pharmacy.id medicine_id=stock.medicine.id %}">{{ stock.medicine.name }}</a></td>
+                            <td>{{ stock.medicine.category.name }}</td>
+                            <td>{{ stock.quantity }}</td>
+                            <td><a class="add_to_cart" href="{% url 'core:add_to_cart' pharmacy_id=stock.pharmacy.id medicine_id=stock.medicine.id %}">Add to cart</a></td>
+                        </tr>
+
+                    {% empty %}
+                        <li>No Medicine at the stock</li>
+
+                    {% endfor %}
+                </table>   
+                
+                <script>
+                    // adding to the cart
+                    document.addEventListener('DOMContentLoaded', function(){
+
+                        document.querySelectorAll('.add_to_cart').forEach(link =>{
+                            link.onclick= function(event){
+                                event.preventDefault();
+
+                                const url= this.href;
+                                const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                                fetch(url, {
+                                    method: "POST",
+                                    headers:{
+                                        "X-CSRFToken": csrfToken,
+                                        "Content-Type": "application/json",
+                                    }
+                                })
+
+                                .then(response =>{
+                                    if (!response.ok) {
+                                        throw new Error("Network response is not okay");
+                                    }
+
+                                    return response.json();
+                                })
+
+                                .then(data =>{
+                                    console.log("Data:", data);
+                                    if (data.message){
+                                        alert(data.message);
+                                        window.location.href= "{% url 'core:pharmacy_stock' pharmacy_id=pharmacy_id %}";
+                                    }
+
+                                    if (data.error) {
+                                        alert(data.error);
+                                        window.location.href= "{% url 'core:pharmacy_stock' pharmacy_id=pharmacy_id %}";
+                                    }
+                                })
+
+                                .catch(error =>{
+                                    console.log("Error", error);
+                                });
+                            }
+                        });
+                    }); 
+                </script>
+            </div>
+            
+            <div class="new-stock-item">
+                <h4>Add stock</h4>
+                <form method="post" action="{% url 'core:pharmacy_stock' pharmacy_id=pharmacy_id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="new_stock_item">
+                    {{ form.as_p }}
+                    <button type="submit">save</button>
+                </form>
+            </div>
+        </div>
+
+    </body>
+</html>

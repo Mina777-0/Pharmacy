@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Sign in Page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(178, 246, 250);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+            .section{
+                padding: 20px;
+                margin-top: 150px;
+                margin-left: 40%;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(4, 49, 51);
+                color: rgb(178, 246, 250);
+                width: 250px;
+                height: 150px;
+                text-align: center;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .section input{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(4, 49, 51);
+                width: 75%px;
+                height: 20px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+            }
+
+            .section button{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(4, 49, 51);
+                width: 25%px;
+                height: 30px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+            }
+        </style>
+        
+    </head>
+    <body>
+        <div class="section">
+            <form method="post" action="{% url 'core:signin' %}">
+                {% csrf_token %}
+                <input type="email" name="email" placeholder="Email Address">
+                <input type="password" name="password" placeholder="Password">
+                <button type="submit">Log in</button>
+            </form>
+        </div>
+            
+    </body>
+</html>

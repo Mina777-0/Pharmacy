@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Orders page</title>
+        <style>
+            body{
+                margin: 0;
+                padding: 20px;
+            }
+            .orders ol{
+                list-style-type:decimal;
+                padding: 8px;
+                margin-left: 50px;
+            }
+
+            .orders li {
+                padding: 10px;
+            }
+
+            #itemsBtn:hover{
+                cursor: pointer;
+            }
+
+            .order-items{
+                display: none;
+                padding: 10px;
+                overflow-y: scroll;
+                list-style-type: lower-roman;
+            }
+
+            .order-items li{
+                padding: 5px;
+            }
+        </style>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', function(){
+                let order= document.querySelectorAll('#itemsBtn');
+
+                order.forEach(btn =>{
+                    btn.onclick= function(){
+                        let order_items= btn.querySelector('.order-items');
+                        if (order_items.style.display == "none") {
+                            order_items.style.display= "block";
+                        } else {
+                            order_items.style.display = "none";
+                        }
+                    }
+                })
+
+            });
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="orders">
+                <h4>Orders:</h4>
+                <ol>
+                    {% for order in orders %}
+                        <li id="itemsBtn">{{ order }}
+                            <ol class="order-items">
+                                {% for item in order.order_items.all %}
+                                    <li>{{ item }}</li>
+                                {% endfor %}
+                            </ol>
+                        </li>
+                    {% endfor %}
+                </ol>
+            </div>
+
+           
+        </div>
+    </body>
+</html>

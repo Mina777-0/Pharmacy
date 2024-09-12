@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart Page</title>
+    <style>
+        body{
+            padding: 15px;
+        }
+        .item-quantity {
+            width: 25px;
+            text-align: center;
+        }
+
+        .backBtn{
+            padding: 8px;
+            text-decoration: none;
+            background-color: rgb(1, 119, 119);
+            color: azure;
+            border: thin;
+            border-radius: 50%;
+        }
+    </style>
+      <script>
+        function add(event){
+            let button = event.target;
+            let form = button.closest('form');
+            let quantityInput = form.querySelector('.item-quantity');
+            quantityInput.value = parseInt(quantityInput.value) + 1;
+            form.submit();
+        }
+
+        function subtract(event){
+            let button = event.target;
+            let form = button.closest('form');
+            let quantityInput = form.querySelector('.item-quantity');
+            quantityInput.value = parseInt(quantityInput.value) - 1;
+            form.submit();
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            
+            document.querySelectorAll('.sub-btn').forEach(btn => {
+                btn.addEventListener('click', subtract);
+            });
+
+            document.querySelectorAll('.add-btn').forEach(btn => {
+                btn.addEventListener('click', add);
+            });
+
+            document.querySelectorAll('.myForm').forEach(form =>{
+                let currentQuantity= form.querySelector('.item-quantity');
+
+                if (currentQuantity.value == 1) {
+                    form.querySelector('.sub-btn').innerHTML = "&#128465";
+                } else {
+                    form.querySelector('.sub-btn').innerHTML = "-";
+                }
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="carts">
+
+                {% for item in cart_items %}
+                <form class="myForm" method="post" action="{% url 'core:cart' user_id=user_id %}">
+                    {% csrf_token %}
+                    <input type="checkbox" name="item" value="{{ item.item.medicine.name }}">
+                    <label>{{ item.item.medicine.name }}/{{ item.item.pharmacy.name }}</label> 
+                    <button type="submit" class="add-btn" name="btn" value="add_btn">+</button>
+                    <input type="hidden" name="item_id" value="{{ item.id }}">
+                    <input class="item-quantity" type="text" name="quantity" value="{{ item.quantity }}" readonly>
+                    <button type="submit" class="sub-btn" name="btn" value="sub_btn">-</button>
+                </form>
+                {% endfor %}
+            
+        </div>
+        <div>
+            <p id="total_cost">Total cost {{ total_cost }}$</p>
+            <a class="backBtn" href="{% url 'core:admin_home' %}">Back</a>
+            <a class="create-order" href="{% url 'core:create_order' user_id=user_id  %}">Create order</a>
+        </div>
+        <script>
+            
+        </script>
+    
+    </div>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Home Page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(178, 246, 250);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+
+            ul{
+                margin-top: 0;
+                list-style-type: none;
+                padding: 8px;
+                overflow: hidden;
+                background-color: rgb(4, 49, 51);
+            }
+
+            li {
+                padding: 8px;
+                color: rgb(178, 246, 250);
+                float: left;
+            }
+            
+            li a{
+                color: rgb(178, 246, 250);
+                text-decoration: none;
+                font-style: oblique;
+            }
+
+            li a:hover{
+                text-decoration: underline;
+            }
+
+            .container{
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+            }
+
+            .models-sec{
+                margin-top: 70px;
+                margin-left: 70px;
+                margin-bottom: 50px;
+                padding: 10px;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(4, 49, 51);
+                width: 150px;
+                height: 55px;
+                text-align: center;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .models-sec a{
+                text-decoration: none;
+                color:rgb(178, 246, 250);
+            }
+            
+        </style>
+        
+    </head>
+    <body>
+        <div>
+            <ul>
+                <li>Welcome {{ request.user.email }}</li>
+                <li><a href="{% url 'core:groups' %}">Groups</a></li>
+                <li><a href="{% url 'core:users' %}">Users</a></li>
+                <li><a href="">Change password</a></li>
+                <li><a href="{% url 'core:signout' %}">Log out</a></li>
+            </ul>
+        </div>
+        <div class="container">
+            <div class="models-sec">
+                <a href="{% url 'core:pharmacys' %}">Pharmacies</a>
+            </div>
+            <div class="models-sec">
+                <a href="{% url 'core:doctors' %}">Doctors</a>
+            </div>
+            <div class="models-sec">
+                <a href="{% url 'core:categories' %}">Categories</a>
+            </div>
+        </div>
+        <div class="container">
+            <div class="models-sec">
+                <a href="{% url 'core:medicines' %}">Medicines</a>
+            </div>
+            <div class="models-sec">
+                <a href="{% url 'core:carts' %}">Carts</a>
+            </div>
+            <div class="models-sec">
+                <a href="{% url 'core:orders' %}">Orders</a>
+            </div>
+        </div>
+
+    </body>
+</html>

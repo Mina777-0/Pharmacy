@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Sign in page</title>
+    </head>
+    <body>
+        <div>
+            <h4>Please, Sign in</h4>
+            <form method="post" action="{% url 'user/api:signin' %}">
+                {% csrf_token %}
+                <input type="text" name="email" placeholder="Email address">
+                <input type="password" name="password" placeholder="Password">
+                <button type="submit">Log in</button>
+            </form>
+            <script>
+                document.querySelector('form').addEventListener('submit', function(event){
+                    event.preventDefault();
+
+                    const formdata= new FormData(this);
+                    const url= this.action;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    const email= formdata.get('email');
+                    const password= formdata.get('password');
+
+                    const data= JSON.stringify({
+                        email:email,
+                        password:password,
+                    });
+
+                    console.log("Data:", data);
+
+                    fetch(url, {
+                        method: "POST",
+                        body: data,
+                        headers: {
+                            'Content-Type': "application/json",
+                            "X-CSRFToken": csrfToken,
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok) {
+                            throw new Error("Network response is not okay");
+                        }
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("data:", data);
+                        if (data.message){
+                            alert(data.message);
+                            localStorage.setItem('email', data.data.email);
+                            sessionStorage.setItem('token', data.token);
+
+                            window.location.href= "{% url 'user/api:main_page' %}";
+                        } else {
+                            alert(data.error);
+                        }
+                    })
+
+                    .catch(error =>{
+                        console.log("error:", error);
+                    });
+                    
+                });
+            </script>
+        </div>
+    </body>
+</html>

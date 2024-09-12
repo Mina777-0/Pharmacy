@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Medicines Page</title>
+
+        <style>
+            
+            .new-med-form{
+                margin: 75px 0 0 450px;
+                padding: 10px;
+                display: none;
+                position: fixed;
+                z-index: 1;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(107, 107, 246);
+                width: max-content;
+                height: 450px;
+                overflow: auto;
+                text-align: center;
+            }
+
+            .closebtn{
+                color: white;
+                float: right;
+                font-size: large;
+                font-weight: bold;
+            }
+
+            .closebtn:hover{
+                cursor:default;
+            }
+        </style>
+        <script>
+            function showDiv(div){
+                document.querySelector(`.${div}`).style.display= "block";
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                document.querySelector('#medbtn').onclick= function(){
+                    let div= this.dataset.div;
+                    showDiv(div);
+                }
+
+                document.querySelector('.closebtn').onclick= function(){
+                    document.querySelector('.new-med-form').style.display= "none";
+                }
+            });
+        </script>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="medicines">
+                <button id="medbtn" data-div="new-med-form">new medicine</button>
+                Medicines: 
+                <ul>
+                    {% for medicine in medicines %}
+                        <li><a href="{% url 'core:edit_medicine' medicine_id=medicine.id %}">{{ medicine.name }} -- {{ medicine.category }} -- {{ medicine.serial_number }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="new-med-form">
+                <form class="medicine-form" method="post" action="{% url 'core:medicines' %}" enctype="multipart/form-data">
+                    <span class="closebtn">&times;</span>
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">save</button>
+                </form>
+
+                <script>
+                    // New medicine form
+                    document.querySelector('.medicine-form').onsubmit= function(event){
+                        event.preventDefault();
+                        const formdata= new FormData(this);
+                        const url= this.action;
+                        const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                        console.log("formdata:", ...formdata.entries());
+
+                        fetch(url, {
+                            method: "POST",
+                            body: formdata,
+                            headers: {
+                                'X-CSRFToken': csrfToken,
+                            }
+                        })
+
+                        .then(response =>{
+                            if (!response.ok) {
+                                throw new Error("Network response is not okay");
+                            }
+
+                            return response.json();
+                        })
+
+                        .then(data =>{
+                            console.log("data:", data);
+                            if (data.message) {
+                                alert(data.message);
+                                window.location.href= "{% url 'core:medicines' %}";
+                            }
+
+                            if (data.error) {
+                                alert(data.error);
+                                window.location.href= "{% url 'core:medicines' %}";
+                            }
+                        })
+
+                        .catch(error => {
+                            console.log("error:", error);
+                        });
+                    }
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

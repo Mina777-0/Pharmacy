@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Home Page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(187, 250, 178);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }   
+            .form-sec{
+                padding: 20px;
+                margin-top: 150px;
+                margin-left: 40%;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(7, 41, 2);
+                color:rgb(187, 250, 178);
+                width: 250px;
+                height: 150px;
+                text-align: center;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .form-sec input{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(7, 41, 2);
+                width: 75%px;
+                height: 20px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+            }
+
+            .form-sec button{
+                border: thin;
+                border-radius: 5px;
+                color: rgb(7, 41, 2);
+                width: 25%px;
+                height: 30px;
+                padding: 8px;
+                margin: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+            }
+
+            .group-sec{
+                padding: 5px;
+            }
+
+            .group-sec ul{
+                padding: 8px;
+                list-style-type: none;
+            }
+            .group-sec li{
+                padding: 5px;
+            }
+
+            .group-sec li a{
+                text-decoration: none;
+                color: rgb(7, 41, 2);
+                font-weight: bold;
+            }
+            .group-sec li a:hover{
+                color: rgb(75, 248, 132);
+            }
+            
+        </style>
+        
+    </head>
+    <body>
+        <div class="group-sec">
+            <h3>Groups:</h3>
+            <ul>
+                {% for group in groups %}
+                    <li><a href="{% url 'core:group' group.name %}">{{ group }}</a></li>
+                {% empty %}
+                    <li>groups: 0</li>
+                {% endfor %}
+                
+            </ul>
+        </div>
+        <div class="form-sec">
+            <form id="group-form" method="post" action="{% url 'core:groups' %}">
+                {% csrf_token %}
+                <input type="text" name="group_name" placeholder="Group name">
+                <button type="submit">Create a group</button>
+            </form>
+        </div>
+        <script>
+            document.querySelector('#group-form').addEventListener('submit', function(event){
+                event.preventDefault();
+
+                const url= '{% url "groups" %}';
+                var formdata= new FormData(this);
+
+                fetch(url, {
+                    method: "POST",
+                    body: formdata,
+                    headers:{
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                })
+                .then(response =>{
+                    if (!response.ok) {
+                        throw new Error("Network response is not okay")
+                    }
+                    return response.json();
+                })
+                .then(data =>{
+                    console.log("data:", data);
+                    alert(data.message);
+                    window.location.href= "{% url 'core:groups' %}"
+                })
+                .catch(error =>{
+                    console.log('error:', error);
+                    alert("Error:", error);
+                })
+
+            })
+        </script>
+
+    </body>
+</html>

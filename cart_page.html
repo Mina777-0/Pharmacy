@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Cart page</title>
+    </head>
+    <body>
+        <div class="cartItems">
+            HI
+
+        </div>
+        <script>
+            const token = sessionStorage.getItem("token");
+            console.log("Token:", token);
+
+            const url= "{% url 'user/api:user_cart' %}";
+
+            fetch(url, {
+                method: 'GET',
+                headers:{
+                    'Content-Type': 'application/json',
+                    'Authorization': `Token ${token}`,
+                }
+            })
+
+            .then(response =>{
+                if (!response.ok) {
+                    throw new Error("Network response isn't okay");
+                }
+                return response.json();
+            })
+
+            .then(data =>{
+                console.log("data:", data);
+
+                // Calculate total price
+                let totalPrice = 0;
+                data.forEach(item =>{
+                    console.log("Total price:", item.subtotal);
+                    totalPrice += item.subtotal;
+                });
+
+                console.log("Total_price:", totalPrice);
+                
+            })
+
+            .catch(error =>{
+                console.log("error:", error);
+            });
+        </script>
+    </body>
+</html>

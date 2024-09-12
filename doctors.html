@@ -1,0 +1,248 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="{% static 'doctors.css' %}">
+        <script src="{% static 'doctors.js' %}"></script>
+
+        <title>Doctors Page</title>
+
+        <style>
+            body{
+                margin: 5px;
+                padding: 10px;
+                background-color:rgb(228, 253, 253);
+            }
+            .container{
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                margin: 0 0 45px 0;
+            }
+
+            .reg-btn{
+                background-color: rgb(84, 173, 247);
+                padding: 10px;
+                color: white;
+                border: thin;
+                border-radius: 5px;
+                font-family: Georgia;
+                font-weight: bold;
+            }
+
+            .reg-btn:hover{
+                cursor: pointer;
+            }
+
+            .reg-sec{
+                display: none;
+                padding: 10px;
+                position: fixed;
+                margin: 25px 0 0 550px;
+                z-index: 1;
+                background-color: rgb(84, 173, 247);
+                width: max-content;
+                height: max-content;
+                border: thin;
+                border-radius: 8px;
+                overflow: auto;
+                text-align: center;
+                font-family: Cambria;
+            }
+
+            .doc-reg-form{
+                text-align: center;
+            }
+
+            .doc-reg-form button{
+                background-color: rgb(4, 105, 182);
+                color: white;
+                border: thin;
+                border-radius: 5px;
+                padding: 7px;
+                font-family: Cambria;
+                font-size: medium;
+            }
+
+            .closeBtn{
+                color: white;
+                float: right;
+                font-size: large;
+                font-weight: bold;
+            }
+
+            .closeBtn:hover{
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+            .search-bar{
+                font-family: Cambria;
+            }
+
+            .search-bar input{
+                padding: 7px;
+                font-family: Cambria;
+            }
+
+            .search-bar button{
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(84, 173, 247);
+                color: white;
+                font-family: Cambria;
+                font-size: medium;
+                padding: 7px;
+            }
+
+            .docs-table{
+                font-family: Cambria;
+                padding: 15px;
+            }
+
+            .docs-table th{
+                text-align: center;
+                padding: 10px;
+                border: 1px solid black;
+            }
+
+            .docs-table tr, td{
+                text-align: center;
+                padding: 10px;
+                border: 1px solid black;
+            }
+
+            .docs-table tr ul{
+                list-style-type:lower-roman;
+            }
+
+            .docs-table tr a{
+                text-decoration: none;
+                color: black;
+            }
+
+            .docs-table tr a:hover{
+                color: rgb(60, 159, 240);
+            }
+
+        </style>
+
+        <script>
+            function showDiv(div){
+                document.querySelector(`.${div}`).style.display= "block";
+            }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                document.querySelector('.reg-btn').onclick= function(){
+                    let div= this.dataset.div;
+                    showDiv(div);
+                }
+
+                document.querySelector('.closeBtn').onclick= function(){
+                    document.querySelector('.reg-sec').style.display= "none";
+                }
+            });
+        </script>
+       
+    </head>
+    <body>
+        <div class="container">
+            <div class="search-bar">
+                <form method="post" action="{% url 'core:doctors' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="filter-doctors">
+                    <input type="text" name="pharmacy" placeholder="search pharamcy..">
+                    <input type="text" name="doctor" placeholder="search doctor..">
+
+                    <button type="submit">search</button>
+                </form>
+            </div>
+            <div class="reg-sec">
+                <span class="closeBtn">&times;</span>
+                <form class="doc-reg-form" method="post" action="{% url 'core:doctors' %}">
+                    <input type="hidden" name="form_type" value="doctor_registration">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">save</button>
+                </form>
+                <script>
+                    // Doctor registration form
+    
+                    document.querySelector('.doc-reg-form').onsubmit= function(event){
+                        event.preventDefault();
+    
+                        const formdata= new FormData(this);
+                        const url= this.action;
+                        const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+                        console.log("formdata: ", ...formdata.entries());
+    
+                        fetch(url, {
+                            method: 'POST',
+                            body: formdata,
+                            headers:{
+                                'X-CSRFToken': csrfToken,
+                            }
+                        })
+    
+                        .then(response =>{
+                            if (!response.ok){
+                                throw new Error("Network response is not okay");
+                            }
+                            return response.json();
+                        })
+    
+                        .then(data =>{
+                            console.log("data:", data);
+                            if (data.message) {
+                                alert(data.message);
+                                window.location.href="{% url 'core:doctors' %}";
+                            }
+    
+                            if (data.error) {
+                                alert(data.error);
+                                window.location.href= "{% url 'core:doctors' %}";
+                            }
+                        })
+    
+                        .catch(error =>{
+                            console.log("Error:", error);
+                        });
+                    }
+                </script>
+            </div>
+            <div>
+                <button class="reg-btn" data-div="reg-sec">new doctor</button>
+            </div>
+        </div>
+
+        <div class="docs-table">
+            <table>
+                <th>First name</th>
+                <th>Last name</th>
+                <th>Pharmacy</th>
+                <th>Shifts</th>
+                <th>Days</th>
+
+                {% for doc in doctors %}
+                <tr>
+                    <td><a href="{% url 'core:doctor' doc.id %}">{{ doc.first_name }}</a></td>
+                    <td>{{doc.last_name}}</td>
+                    <td>
+                        <ul>
+                            {% for pharmacy in doc.pharmacy.all %}
+                                <li>{{ pharmacy.name }}{% if not forloop.last %}{% endif %}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>{{doc.shift}}</td>
+                    <td>{{doc.days}}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+    </body>
+</html>

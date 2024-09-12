@@ -1,0 +1,62 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Update pharmacy page</title>
+
+        <style>
+            .update-pharm-form{
+                position:fixed;
+                z-index: 1;
+                top: 50px;
+                left: 50px;
+                width: 450px;
+                height: 250px;
+                background-color: rgb(4, 49, 51);
+                border-radius: 8px;
+                text-align: center;
+                overflow: auto;
+                color: beige;
+            }
+
+            .update-pharm-form input{
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .update-pharm-form button{
+                padding: 5px;
+                border-radius: 5px;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                margin-bottom: 15px;
+            }
+
+            .delete-link{
+                float:left;
+                text-decoration: none;
+                color:white;
+                border: thin;
+                border-radius: 5px;
+                padding: 5px;
+                background-color: red;
+            }
+
+
+        </style>
+
+    </head>
+
+    <body>
+        <div class="update-pharm-form">
+            <form method="post" action="{% url 'core:update_pharmacy' pharmacy_id=pharmacy_id %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">save</button>
+            </form>
+            <a href="{% url 'core:remove_pharmacy' pharmacy_id=pharmacy_id %}" class="delete-link">Delete</a>
+        </div>
+        
+
+    </body>
+</html>

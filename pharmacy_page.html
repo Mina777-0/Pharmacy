@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Stock</title>
+    </head>
+    <body>
+        <div>
+            <h1 class="pharm-name"></h1>
+
+            <div class="med"></div>
+
+        </div>
+        <script>
+            const token= sessionStorage.getItem('token');
+            // Getting the pharmacy name
+            let pharmacyName= localStorage.getItem('pharmacyName');
+            document.querySelector('.pharm-name').innerHTML= pharmacyName;
+            console.log("PharmacyName:", pharmacyName);
+
+            // Getting the pharmacy name
+            let pharmacyID= localStorage.getItem('pharmacyID');
+            const url= `{% url 'user/api:pharmacy_stock' 0 %}`.replace("0", pharmacyID);
+            console.log("PharmacyURL:", url);
+            
+            
+            fetch(url, {
+                method: 'GET',
+                headers:{
+                    'Content-Type': "application/json"
+                }
+            })
+
+            .then(response =>{
+                if (!response.ok) {
+                    throw new Error("Network response isn't okay");
+                }
+                return response.json();
+            })
+
+            .then(data => {
+                console.log("data:", data);
+                let medicineSec= document.querySelector('.med');
+                medicineSec.innerHTML= "";
+                
+
+                data.forEach(item =>{
+                    let medicine= item.medicine;
+                    let medicineElement= document.createElement('div');
+                    let add_to_cart_url= `{% url 'user/api:add_to_cart' pharmacy_id=0 medicine_id=0 %}`.replace('0', pharmacyID).replace('0', medicine.id);
+
+                    medicineElement.innerHTML= `
+                    <h3>Name: ${medicine.name}</h3>
+                    <p>Leaflet: ${medicine.leaflet}</p>
+                    <p>Company: ${medicine.company}</p>
+                    <p>Production date: ${medicine.production_date}</p>
+                    <p>Expiry date: ${medicine.expiry_date}</p>
+                    <p>Price: ${medicine.price}$</p>
+                    <a href='${add_to_cart_url}' class= "cartBtn">Add to cart</a>
+                    `;
+
+                    medicineSec.appendChild(medicineElement);
+                    
+                });
+
+                    document.querySelectorAll('.cartBtn').forEach(btn =>{
+                    btn.onclick = function(event){
+                        event.preventDefault();
+
+                        const cartUrl= this.href;
+
+                        fetch(cartUrl, {
+                            method: 'POST',
+                            headers:{
+                                'Content-Type': 'application/json',
+                                'Authorization': `Token ${token}`,
+                            }
+                        })
+
+                        .then(response =>{
+                            if (!response.ok) {
+                                throw new Error("Network response isn't okay");
+                            }
+                            return response.json();
+                        })
+
+                        .then(data =>{
+                            console.log("data:", data);
+                            if (data.message) {
+                                alert(data.message);
+                            } else {
+                                alert(data.error);
+                            }
+                        })
+
+                        .catch(error =>{
+                            console.log("error:", error);
+                        });
+                    }
+                });
+            })
+
+            .catch(error =>{
+                console.log("error:", error);
+            });
+
+
+            
+        </script>
+    </body>
+</html>

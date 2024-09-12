@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Payment page</title>
+        <script src="https://js.stripe.com/v3/"></script>
+    </head>
+    <body>
+        <div class="container">
+            <div class="pyament-method">
+                Choose your payment:
+                <form id="pay-meth-form" method="post" action="{% url 'payment' order_id=order_id %}">
+                    {% csrf_token %}
+                    <input id="cashBtn" type="radio" name="pay_method" value="cash">
+                    <label for="cashBtn">Cash</label><br>
+                    <input id="cardBtn" type="radio" name="pay_method" value="card">
+                    <label for="cardBtn">Card</label><br>
+                    <button type="submit">checkout</button>
+                </form>
+            </div>
+
+            <script>
+                document.querySelector('#pay-meth-form').onsubmit= function(event){
+                    event.preventDefault();
+                    
+                    let cardBtn= this.querySelector('#cardBtn');
+                    let cashBtn= this.querySelector('#cashBtn');
+                    const formdata= new FormData(this);
+                    const URL= this.action;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    console.log("From data:", ...formdata.entries());
+
+                    if (cashBtn.checked && cashBtn.value === "cash") {
+                        fetch(URL, {
+                        method: 'POST',
+                        body: formdata,
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                        }
+                        })
+
+                        .then(response =>{
+                            if (!response.ok) {
+                                throw new Error("Network response is not okay")
+                            }
+
+                            return response.json();
+                        })
+
+                        .then(data =>{
+                            console.log("data:", data);
+                            alert(data.message);
+                            window.location.href= "{% url 'core:admin_home' %}"; 
+                        })
+
+                        .catch(error =>{
+                            console.log("error:", error);
+                        });
+                    } if (cardBtn.checked && cardBtn.value === "card") {
+
+                            var stripe = Stripe('{{ stripe_publishable_key }}');
+                            const baseUrl = "{% url 'checkout' 0 %}".replace('0/','');
+                            var orderId = '{{ order_id }}';
+                            const url = `${baseUrl}${orderId}/`;
+
+
+                            console.log(fetch(url, {
+                                method: 'POST',
+                                headers:{
+                                    'Content-type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                body: JSON.stringify({})
+                            })
+                            .then(function (response) {
+                                return response.json();
+                            })
+                            .then(function (session) {
+                                if (session.error){
+                                    alert(session.error)
+                                } else{
+                                    return stripe.redirectToCheckout({ sessionId: session.id });
+                                }
+                                
+                            })
+                            .then(function (result) {
+                                if (result.error) {
+                                    alert(result.error.message);
+                                } else {
+                                    const success_url= "{% url 'core:success_payment' %}";
+                                    fetch(success_url, {
+                                        headers:{
+                                            'Content-Type': 'application/json',
+                                        }
+                                    })
+                                    .then(response =>{
+                                        if (!response.ok) {
+                                            throw new Error("Network response is not okay");
+                                        }
+                                        return response.json();
+                                    })
+
+                                    .then(data =>{
+                                        console.log("Data:", data);
+                                        alert(data.message)
+                                        window.location.href= "{% url 'core:admin_home' %}";
+                                    })
+
+                                    .catch(error =>{
+                                        console.log("Error:", error);
+                                    });
+                                }
+                            })
+                            .catch(function (error) {
+                                console.error('Error:', error);
+                            })
+                        );
+                    }
+                }
+            </script>
+
+        </div>
+
+    </body>
+</html>

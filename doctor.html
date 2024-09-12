@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Doctor profile page</title>
+
+    </head>
+    <body>
+        <div>
+            <div class="update-doc-div">
+                <form class="doc-update-form" method="post" action="{% url 'core:doctor' doctor_id=doctor %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit">save</button>
+                </form>
+                <a class="del-doc" href="{% url 'core:remove_doctor' doctor_id=doctor %}">Remove</a>
+            </div>
+            <script>
+                // updating doctor
+
+                document.querySelector('.doc-update-form').onsubmit= function(event){
+                    event.preventDefault();
+
+                    const formdata= new FormData(this);
+                    const url= this.action;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    
+                    console.log("formdata: ", ...formdata.entries());
+
+                    fetch(url, {
+                        method: "POST",
+                        body: formdata,
+                        headers:{
+                            'X-CSRFToken': csrfToken,
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok){
+                            throw new Error("Network response is not okay");
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("data:", data);
+                        if (data.message){
+                            alert(data.message);
+                            window.location.href= "{% url 'core:doctors' %}";
+                        }
+                    })
+
+                    .catch(error =>{
+                        console.log("error:", error);
+                    });
+                }
+
+                // Deleting doctor
+
+                document.querySelectorAll('.del-doc').forEach(link => {
+                    link.onclick= function(event){
+                        event.preventDefault();
+
+                        const url= this.href;
+                        const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+                        
+                        fetch(url, {
+                            mehtod: "DELETE",
+                            headers:{
+                                "x-CSRFToken": csrfToken,
+                            }
+                        })
+
+                        .then(reposne =>{
+                            if (!response.ok){
+                                throw new Error("Network reponse is not okay");
+                            }
+                            return reposne.json();
+                        })
+
+                        .then(data =>{
+                            console.log("Data:", data)
+                            if (data.message){
+                                alert(data.message);
+                            }
+                            window.location.href= "{% url 'core:doctors' %}";
+                        })
+
+                        .catch(error =>{
+                            console.log("error:", error);
+                        });
+                    }
+                });
+            </script>
+        </div>
+        
+    </body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Medicine {{ medicine_id }} Page</title>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="medicines">
+                <form class="medicine-form" method="post" action="">
+                    {% csrf_token %}
+                    {{ form }}
+                    <button type="submit">save</button>
+                </form>
+            </div>
+            <a class="removeLink" href="{% url 'core:remove_medicine' medicine_id=medicine_id %}">remove</a>
+
+            <script>
+                // removal of the medicine instance
+
+                document.querySelector('.removeLink').onclick= function(event){
+                    event.preventDefault();
+                    const url= this.href;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    fetch(url, {
+                        method: "DELETE",
+                        headers:{
+                            'X-CSRFToken': csrfToken,
+                            'Content-Type': 'application/json',
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok) {
+                            throw new Error("Network response is not okay");
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("Data:", data);
+                        alert(data.message);
+                        window.location.href= "{% url 'core:medicines' %}";
+                    })
+
+                    .catch(error =>{
+                        console.log("Error:", error);
+                    })
+                }
+            </script>
+        </div>
+    </body>
+</html>

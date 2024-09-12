@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Home Page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(187, 250, 178);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+
+            #container-1{
+                display: flex;
+                justify-content: space-between;
+                text-align: center;
+            }
+
+            #container-2{
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .user-sec {
+                list-style-type: none;
+                padding: 5px;
+                margin-top: 25px;
+                margin-left: 100px;
+                border: thin;
+                border-radius: 5px;
+                width: 20%;
+                height: fit-content;
+                background-color: rgb(7, 41, 2);
+                color: rgb(187, 250, 178);
+            }
+
+            .user-sec ul{
+                padding: 5px;
+                list-style-type:none ;
+            }
+
+            .user-sec li{
+                margin: 8px;
+            }
+
+            .perm-sec{
+                list-style-type: none;
+                padding: 5px;
+                margin-top: 25px;
+                margin-right: 100px;
+                border: thin;
+                border-radius: 5px;
+                width: 30%;
+                height: max-content;
+                background-color: rgb(7, 41, 2);
+                color: rgb(187, 250, 178);
+            }
+
+            .perm-sec ul{
+                padding: 5px;
+                list-style-type:none ;
+            }
+
+            .perm-sec a{
+                text-decoration: none;
+                color: rgb(7, 41, 2);
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(187, 250, 178);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-style: oblique;
+            }
+
+            .del-button{
+                margin-top: 30px;
+                margin-right: 30px;
+                float: right;
+            }
+
+            .del-button a{
+                padding: 10px;
+                border: thin;
+                border-radius: 8px;
+                background-color: rgb(153, 2, 2);
+                color: antiquewhite;
+                text-decoration: none;
+            }
+
+            .perms-sec{
+                margin: 60px;
+                margin-right: 150px;
+                padding: 10px;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(7, 41, 2);
+                color:rgb(187, 250, 178);
+                width: 20%;
+                height: 150px;
+                text-align: center;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .perms-sec button {
+                margin-top: 15px;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(187, 250, 178);
+                color: rgb(7, 41, 2);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+                width: 50px;
+                height: 25px;
+            }
+
+            .users-sec{
+                margin: 50px;
+                margin-left: 100px;
+                padding: 10px;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(7, 41, 2);
+                color:rgb(187, 250, 178);
+                width: 20%;
+                height: 150px;
+                text-align: center;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                text-align: center;
+            }
+
+            .users-sec select{
+                margin: 20px;
+            }
+
+            .users-sec button {
+                margin-top: 15px;
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(187, 250, 178);
+                color: rgb(7, 41, 2);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+                width: 50px;
+                height: 25px;
+            }
+
+
+            
+        </style>
+        
+        <script>
+
+            const names= {{ fnames|safe }};
+
+            document.addEventListener('DOMContentLoaded', function(){
+
+                let input= document.querySelector('#search');
+
+                input.oninput= function(event){
+                    let query= event.target.value.toLowerCase();
+                    let usersList= document.querySelector('#users');
+
+                    var result = names.filter(name => name.toLowerCase().startsWith(query));
+
+                    if(result.length > 0){
+                        result.forEach(name =>{
+                            let li= document.createElement('li');
+                            li.textContent= name;
+                            usersList.appendChild(li);
+                        });
+                    }
+
+                    if (input.value.length < 1){
+                        usersList.innerHTML= "";
+                    }
+                }  
+            });
+        </script>
+        
+    </head>
+    <body>
+        <div id="container-1">
+        <div class="user-sec">
+            <h3>Users:</h3>
+            <ul>
+                {% for gr_user in group_users %}
+                    <li>{{ gr_user }}</li>
+                {% empty %}
+                    <li>users: 0</li>
+                {% endfor %}
+                
+            </ul>
+        </div>
+
+
+        <div class="perm-sec">
+            <h3>Permissions:</h3>
+            <ul>
+                {% for permission in permissions %}
+                    <li>{{ permission }}</a></li>
+                {% empty %}
+                    <li>permissions: 0</li>
+                {% endfor %}
+                
+            </ul>
+
+            <a href="{% url 'core:remove_permissions' group.name %}">remove permissions</a>
+        </div>
+        </div>
+
+        <div id="container-2">
+            <div class="users-sec">
+                <form id="users-form" method="post" action="{% url 'core:group' group.name %}">
+                    {% csrf_token %}
+                    <label for="email"> select users</label><br>
+                    <select name="email" required>
+                        {% for user in users %}
+                            <option value="{{ user.email }}">{{ user.first_name }}</option>
+                        {% endfor %}
+                    </select><br>
+                    <button type="submit">save</button>
+                </form>
+                <div>
+                    <ul id="users"></ul>
+                </div>
+
+                <script>                    
+                        document.querySelector('#users-form').addEventListener('submit', function(event){
+                            event.preventDefault();
+
+                            const Fromdata= new FormData(this);
+                            const url= this.action;
+                            const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                            fetch(url, {
+                                method: 'POST',
+                                body: Fromdata,
+                                headers:{
+                                    'X-CSRFToken': csrfToken,
+                                }
+                            })
+
+                            .then(response =>{
+                                if (!response.ok){
+                                    throw new Error("Netwrok is not respnding");
+                                }
+
+                                return response.json();
+                            })
+
+                            .then(data =>{
+                                console.log("Data:", data);
+                                alert(data.message);
+                                window.location.href= "{% url 'core:group' group.name %}"
+                            })
+
+                            .catch(error =>{
+                                console.log("Error fetching", error);
+                            })
+                        });
+                </script>
+            </div>
+            <div class="perms-sec">
+                <form id="perms-form" method="post" action="{% url 'core:group' group.name %}">
+                    {% csrf_token %}
+                    <input type="checkbox" name="permissions" value="{{ add_user.id }}">Add User<br>
+                    <input type="checkbox" name="permissions" value="{{ change_user.id }}">Change User<br>
+                    <input type="checkbox" name="permissions" value="{{ view_user.id }}">View User<br>
+                    <input type="checkbox" name="permissions" value="{{ delete_user.id }}">Delete User<br>
+                    <button type="submit">save</button>
+                </form>
+            </div>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function(){
+                        document.querySelector('#perms-form').addEventListener('submit', function(event){
+                            event.preventDefault();
+    
+                            const formdata= new FormData(this);
+                            const url= this.action;
+                            const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+    
+                            console.log("formData:", ...formdata.entries());
+    
+                            fetch(url, {
+                                method: 'POST',
+                                body: formdata,
+                                headers:{
+                                    'X-CSRFToken': csrfToken,
+                                }
+                            })
+    
+                            .then(response =>{
+                                if (!response.ok){
+                                    throw new Error("Network is not responding");
+                                }
+    
+                                return response.json();
+                            })
+    
+                            .then(data =>{
+                                console.log('Data:', data);
+                                alert(data.message);
+                                window.location.href= "{% url 'core:group' group.name %}"
+                            })
+    
+                            .catch(error =>{
+                                console.log("Error fetching and adding the permissions", error);
+    
+                            })
+                        });
+                    });
+                </script>
+        </div>
+        <div class="del-button">
+            <a href="{% url 'core:remove_group' group.name %}">delete group</a>
+        </div>
+    </body>
+</html>

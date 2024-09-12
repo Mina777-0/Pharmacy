@@ -1,0 +1,345 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Pharmacy Page</title>
+
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(178, 246, 250);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+
+            ul{
+                margin: 0;
+                padding: 5px;
+                list-style-type: none;
+                overflow: hidden;
+                background-color: rgb(4, 49, 51);
+            }
+
+            .left{
+                float: left;
+                padding: 8px;
+                color: rgb(178, 246, 250);
+            }
+
+            .left button{
+                border: thin;
+                border-radius: 5px;
+                background-color: rgb(178, 246, 250);
+                color: rgb(4, 49, 51);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-weight: bold;
+                cursor: pointer;
+            }
+
+            .right{
+                float: right;
+                padding: 8px;
+                color: rgb(178, 246, 250);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-style: oblique;
+            }
+
+            .container{
+                display: flex;
+                justify-content: space-around;
+                text-align: center;
+            }
+
+            .pharm-filter{
+                padding: 10px;
+                text-align: left;
+                width: 20%;
+            }
+
+            .pharm-filter form button{
+                background-color: rgb(4, 49, 51);
+                color: white;
+                margin: 10px;
+                padding: 3px;
+                border: thin;
+                border-radius: 7px;
+                
+            }
+
+
+            .pharm-tab{
+                margin-top: 50px;
+                width: 75%;
+                font-family: Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .pharm-tab th{
+                padding: 10px;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .pharm-tab tr td{
+                padding: 10px;
+                text-align: center;
+                border: 1px solid black;
+            }
+
+            .pharm-tab tr a{
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-style: oblique;
+                font-weight: bold;
+                color: rgb(4, 49, 51);
+                text-decoration: none;
+            }
+
+            .pharm-tab tr a:hover{
+                text-decoration: underline;
+                color: white;
+            }
+
+            
+            #new-pharm{
+                display: none;
+                position:fixed;
+                z-index: 1;
+                left: 450px;
+                top: 250px;
+                width: 450px;
+                height: 250px;
+                background-color: rgb(4, 49, 51);
+                color: aqua;
+                border-radius: 8px;
+                text-align: center;
+                overflow: auto;
+            }
+
+            .closeBtn{
+                background-color: rgb(233, 229, 229);
+                color: rgb(3, 28, 29);
+                float: right;
+                font-size: large;
+                font-weight: bold;
+            }
+
+            .closeBtn:hover{
+                text-decoration: none;
+                cursor: pointer;
+            }
+
+            #new-pharm-form button{
+                background-color: rgb(4, 49, 51);
+                color: aqua;
+                border-radius: 5px;
+            }
+
+           
+        </style>
+        <script>
+            function showSec(div){
+                    document.querySelector(`#${div}`).style.display= "block";
+                }
+
+            document.addEventListener('DOMContentLoaded', function(){
+                document.querySelector('#new-pharm-btn').onclick= function(){
+                    const page= this.dataset.sec;
+                    showSec(page);
+                }
+
+                document.querySelector('.closeBtn').onclick= function(){
+                    document.querySelector('#new-pharm').style.display= "none";
+                }
+
+                window.onclick= function(event){
+                    if (event.target == document.querySelector('#new-pharm')) {
+                        document.querySelector('#new-pharm').style.display= "none";
+                    }
+                }
+
+                var pharmacies= {{ pharms|safe }};
+                let input= document.querySelector('#query-input');
+
+                input.oninput= function(event){
+                const query= event.target.value.toUpperCase();
+                console.log("Query:", query);
+                let resultcontainer= document.querySelector('#test');
+                if (query === ""){
+                    resultcontainer.innerHTML = "";
+                }
+                resultcontainer.innerHTML= '';
+
+                pharmacies.forEach(pharmacy =>{
+                    if (pharmacy.name.toUpperCase().includes(query)){
+                        let result= document.createElement('p');
+                        result.textContent= pharmacy.name;
+                        console.log("pharmacy name:", pharmacy.name);
+                        resultcontainer.appendChild(result);
+                    }
+                });
+
+                if (input.value == "") {
+                    document.querySelector('#test').innerHTML= '';
+                    }
+                }; 
+            });
+        </script>
+        
+    </head>
+    <body>
+        <div>
+            <ul>
+                <li class="right">User: {{ request.user.first_name }} {{ request.user.last_name }}</li>
+                <li class="left"><button id="new-pharm-btn" data-sec="new-pharm">Create new pharamcy</button></li>
+                <li class="left">
+                    <form>
+                        <input id="query-input" type="text" placeholder="search pharmacy ..">
+                    </form>
+                    <div id="test"></div>
+                </li>
+            </ul>
+        </div>
+        <div class="container">
+
+            <div class="pharm-filter">
+                <h4>Filter</h4>
+                <form method="post" action="{% url 'core:pharmacys' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="filter_pharmacies">
+                    <input type="checkbox" name="city" value="">
+                    <label>All</label><br>
+                    <input type="checkbox" name="city" value="Khartoum">
+                    <label>Khartoum</label><br>
+                    <input type="checkbox" name="city" value="Bahry">
+                    <label>Bahry</label><br>
+                    <input type="checkbox" name="city" value="Omdurman">
+                    <label>Omdurman</label><br>
+                    <input type="checkbox" name="filter" value="{{ pharamcy.average_review }}">
+                    <label>average review</label><br>
+                    <input type="checkbox" name="filter" value="{{ pharamcy.review_count }}">
+                    <label>review counts</label><br>
+                    <button type="submit">apply</button>
+                </form>
+            </div>
+
+            <div class="pharm-tab">
+                <h4>Registered Pharmacies:</h4>
+                <table>
+                    <th>Name</th>
+                    <th>Address</th>
+                    <th>Phone Number</th>
+                    <th>Email</th>
+                    <th>Average reviews</th>
+                    <th>Review counts</th>
+                    <th>Pharmacy Stock</th>
+
+
+                    {% for pharmacy in pharmacies %}
+                        <tr>
+                            <td><a href="{% url 'core:update_pharmacy' pharmacy.id %}" class="update-link">{{ pharmacy.name }}</a></td>
+                            <td>{{ pharmacy.address }}</td>
+                            <td>{{ pharmacy.phone_number }}</td>
+                            <td>{{ pharmacy.email }}</td>
+                            <td>{{ pharmacy.average_review }}</td>
+                            <td>{{ pharmacy.review_count }}</td>
+                            <td><a href="{% url 'core:pharmacy_stock' pharmacy_id=pharmacy.id %}">Stock</a></td>
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <script>
+                    document.querySelectorAll('.delete-link').forEach(link => {
+                        link.onclick= function(event) {
+                            event.preventDefault();
+
+                            const url= this.href;
+                            const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+                            console.log("url:", url);
+
+
+                            fetch(url, {
+                                method: 'DELETE',
+                                headers:{
+                                    'X-CSRFToken': csrfToken,
+                                }
+                            })
+
+                            .then(response =>{
+                                if (!response.ok){
+                                    throw new Error("Network response is not okay");
+                                }
+
+                                return response.json();
+                            })
+
+                            .then(data =>{
+                                console.log("data:", data);
+                                alert(data.message);
+                                window.location.href= "{% url 'core:pharmacys' %}";
+                            })
+
+                            .catch(error =>{
+                                console.log("error:", error);
+                            })
+                        }
+                    });
+
+                </script>
+            </div>
+        </div>
+        <div id="new-pharm">
+            <span class="closeBtn">&times;</span>
+            <form id="new-pharm-form" method="post" action="{% url 'core:pharmacys' %}">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="new_registration">
+                {{ form.as_p }}
+                <button type="submit">Save</button>
+            </form>
+
+            <script>
+                document.querySelector('#new-pharm-form').addEventListener('submit', function(event){
+                    event.preventDefault();
+                    const formdata= new FormData(this);
+                    const url= this.action;
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    console.log("formdata:", ...formdata.entries());
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formdata,
+                        headers:{
+                            'X-CSRFToken': csrfToken,
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok){
+                            throw new Error("Network response is not okay");
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("data:", data);
+                        if (data.message){
+                            alert(data.message);
+                        }
+                        if (data.error){
+                            alert(data.error);
+                        }
+                        window.location.href= "{% url 'core:pharmacys' %}";
+                    })
+
+                    .catch(error =>{
+                        console.log("error:", error);
+                    });
+                });
+
+            </script>
+        </div>
+
+       
+    </body>
+</html>

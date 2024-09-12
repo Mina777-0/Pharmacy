@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>Category {{ category_id }} Page</title>
+    </head>
+
+    <body>
+        <div class="container">
+            <div class="medicines">
+                <ul>
+                    {% for medicine in medicines %}
+                        <li>{{ medicine.name }} -- {{ medicine.category}} -- {{ medicine.serial_number }}</li>
+                    {% empty %}
+                        <li>No Medicines regiseterd <li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </body>
+</html>

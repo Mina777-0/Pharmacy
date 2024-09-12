@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Users page</title>
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(187, 250, 178);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+            }
+
+            .container1{
+                display: flex;
+                justify-content: space-between;
+            }
+
+            .table-sec{
+                margin-top: 75px;
+                margin-left: 50px;
+                margin-right: 100px;
+                text-align: center;
+                width: max-content;
+                height: max-content;   
+            }
+
+            .table-sec th{
+                padding: 15px;
+            }
+
+            .table-sec td{
+                padding: 5px;
+            }
+            .table-sec tr:nth-child(even){
+                background-color: rgb(60, 73, 58);
+                color: rgb(187, 250, 178);
+            }
+
+            .new-user-btn {
+                margin-top: 150px;
+                margin-right: 10px;
+                width: 250px;
+                height: 100px;
+            }
+
+            .new-user-btn a{
+                border-radius: 5px;
+                background-color: rgb(7, 41, 2);
+                color: rgb(187, 250, 178);
+                text-decoration: none;
+            }
+
+            .remove-group-btn{
+                margin-top: 15px;
+                padding: 10px;
+                color: rgb(7, 41, 2);
+                font-family: Georgia, 'Times New Roman', Times, serif;
+                font-style: oblique;
+            }
+
+            .remove-group-btn form button{
+                margin: 8px;
+                border-radius: 5px;
+                background-color: rgb(7, 41, 2);
+                color: rgb(187, 250, 178);
+            }
+
+        </style>
+    </head>
+    <body>
+        <div class="container1">
+            <div class="table-sec">
+                <h2>Users:</h2>
+                <table>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Last login</th>
+                    <th>Is staff</th>
+                    <th>Groups</th>
+    
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.first_name }}</td>
+                            <td>{{ user.last_name }}</td>
+                            <td>{{ user.last_login }}</td>
+                            <td>{{ user.is_staff }}</td>
+                            <td>
+                                {% for group in user.groups.all %}
+                                    {{ group.name }}{% if not forloop.last %}, {% endif %}
+                                {% endfor %}
+                            </td>
+    
+                        </tr>
+                    {% endfor %}
+                </table>
+
+                <div class="remove-group-btn">
+                    <form id="remove-form" method="post" action="{% url 'core:remove_user_from_group' %}">
+                        {% csrf_token %}
+                        <label for="email">Select user and group:</label><br>
+                        <select id="email" name="email" required>
+                            {% for user in users %}
+                                <option value="{{ user.email }}">{{ user.first_name }}</option>
+                            {% endfor %}
+                        
+                        </select>
+                        <select id="group" name="group" required>
+                            {% for group in groups %}
+                                <option value="{{ group.name }}">{{ group.name }}</option>
+                            {% endfor %}
+                        </select><br>
+                        <button type="submit">remove</button>
+                    </form>
+                </div>
+            </div>
+            <div class="new-user-btn">
+                <a href="{% url 'core:signup' %}">create new user</a><br>
+            </div>
+            <div class="new-user-btn">
+                <a href="">create new user</a><br>
+            </div>
+
+            <script>
+                document.querySelector('#remove-form').addEventListener('submit', function(event){
+                    event.preventDefault();
+
+                    const formdata= new FormData(this);
+                    console.log("form data:", Array.from(formdata.entries()));
+                    const url= "{% url 'remove_user_from_group' %}";
+                    const csrfToken= document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+                    fetch(url, {
+                        method: 'POST',
+                        body: formdata,
+                        headers:{
+                            'X-CSRFToken': csrfToken,
+                        }
+                    })
+
+                    .then(response =>{
+                        if (!response.ok){
+                            throw new Error("Netwrok response is not okay");
+                        }
+
+                        return response.json();
+                    })
+
+                    .then(data =>{
+                        console.log("data:", data);
+                        if (data.message){
+                            alert(data.message);
+                            window.location.href= "{% url 'users' %}";
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                        
+                    })
+
+                    .catch(error =>{
+                        console.log("error:", error);
+                        alert("An error occured" + error.message);
+                    });
+
+                });
+            </script>
+
+        </div>
+
+    </body>
+</html>

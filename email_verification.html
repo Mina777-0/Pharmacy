@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>Email verification page</title>
+
+        <style>
+            body{
+                margin: 0;
+                background-color: rgb(192, 220, 244);
+                font-family:Georgia, 'Times New Roman', Times, serif;
+                color: rgb(7, 41, 2);
+            }
+            
+        </style>
+
+    </head>
+    <body>
+        <div>
+            <p>Hi {{ request.user.first_name }},</p>
+            <a href="http://{{ domain }}{% url 'email_verify' uidb64=uid token=token  %}">verify your email</a>
+        </div>
+
+    </body>
+</html>
